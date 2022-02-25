@@ -1,0 +1,16 @@
+_target_: src.datamodules.webmed_datamodule.WebNIH
+
+bucket_name: "nih" 
+client_url: "http://datastore.lua.lab:8080"
+image_handler: 
+      _target_: src.datamodules.utils.xrayvision_preproc
+
+transform:
+      _target_: torchvision.transforms.Compose
+      transforms: 
+            - _target_: torchxrayvision.datasets.XRayCenterCrop
+            - _target_: torchxrayvision.datasets.XRayResizer
+              size: 224
+batch_size: 100
+num_workers: 1
+pin_memory: False

@@ -6,8 +6,8 @@
 defaults:
   - override /mode: exp.yaml
   - override /trainer: default.yaml
-  - override /model: mnist.yaml
-  - override /datamodule: mnist.yaml
+  - override /model: concept_vectors.yaml
+  - override /datamodule: webnih.yaml
   - override /callbacks: default.yaml
   - override /logger: null
 
@@ -22,21 +22,18 @@ seed: 12345
 
 trainer:
   min_epochs: 1
-  max_epochs: 10
-  gradient_clip_val: 0.5
-
-model:
-  lin1_size: 128
-  lin2_size: 256
-  lin3_size: 64
-  lr: 0.002
+  max_epochs: 2
+  gpus: 1
 
 datamodule:
-  batch_size: 64
-  train_val_test_split: [55_000, 5_000, 10_000]
+  num_workers: 5
+  pin_memory: True
+  batch_size: 1000
+  test_split: 0.7
 
 logger:
   csv:
     name: csv/${name}
   wandb:
-    tags: ["mnist", "simple_dense_net"]
+    project: "cavs"
+    name: ${name}

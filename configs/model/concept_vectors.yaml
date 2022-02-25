@@ -1,0 +1,6 @@
+_target_: src.models.concept_module.ConceptVectorModule
+
+model:
+    _target_: torchxrayvision.models.DenseNet
+    weights: "densenet121-res224-all"
+concept: "gender"

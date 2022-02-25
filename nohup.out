@@ -1,0 +1,272 @@
+[[36m2022-02-21 07:47:37,871[0m][[34msrc.utils[0m][[32mINFO[0m] - Disabling python warnings! <config.ignore_warnings=True>[0m
+CONFIG                                                                          
+├── trainer                                                                     
+│   └── _target_: pytorch_lightning.Trainer                                     
+│       gpus: 1                                                                 
+│       min_epochs: 1                                                           
+│       max_epochs: 10                                                          
+│       resume_from_checkpoint: null                                            
+│       num_sanity_val_steps: 0                                                 
+│                                                                               
+├── model                                                                       
+│   └── _target_: src.models.concept_module.ConceptVectorModule                 
+│       model:                                                                  
+│         _target_: torchxrayvision.models.DenseNet                             
+│         weights: densenet121-res224-all                                       
+│       concept: gender                                                         
+│                                                                               
+├── datamodule                                                                  
+│   └── _target_: src.datamodules.webmed_datamodule.WebNIH                      
+│       bucket_name: nih                                                        
+│       client_url: http://datastore.lua.lab:8080                               
+│       image_handler:                                                          
+│         _target_: src.datamodules.utils.xrayvision_preproc                    
+│       transform:                                                              
+│         _target_: torchvision.transforms.Compose                              
+│         transforms:                                                           
+│         - _target_: torchxrayvision.datasets.XRayCenterCrop                   
+│         - _target_: torchxrayvision.datasets.XRayResizer                      
+│           size: 224                                                           
+│       batch_size: 32                                                          
+│       num_workers: 5                                                          
+│       pin_memory: true                                                        
+│                                                                               
+├── callbacks                                                                   
+│   └── model_checkpoint:                                                       
+│         _target_: pytorch_lightning.callbacks.ModelCheckpoint                 
+│         monitor: val/acc                                                      
+│         mode: max                                                             
+│         save_top_k: 1                                                         
+│         save_last: true                                                       
+│         verbose: false                                                        
+│         dirpath: checkpoints/                                                 
+│         filename: epoch_{epoch:03d}                                           
+│         auto_insert_metric_name: false                                        
+│       early_stopping:                                                         
+│         _target_: pytorch_lightning.callbacks.EarlyStopping                   
+│         monitor: val/acc                                                      
+│         mode: max                                                             
+│         patience: 100                                                         
+│         min_delta: 0                                                          
+│       model_summary:                                                          
+│         _target_: pytorch_lightning.callbacks.RichModelSummary                
+│         max_depth: 1                                                          
+│       rich_progress_bar:                                                      
+│         _target_: pytorch_lightning.callbacks.RichProgressBar                 
+│                                                                               
+├── logger                                                                      
+│   └── csv:                                                                    
+│         name: csv/example                                                     
+│       wandb:                                                                  
+│         tags:                                                                 
+│         - nih                                                                 
+│         - dense_net                                                           
+│                                                                               
+├── test_after_training                                                         
+│   └── True                                                                    
+├── seed                                                                        
+│   └── 12345                                                                   
+└── name                                                                        
+    └── example                                                                 
+[[36m2022-02-21 07:47:37,909[0m][[34mpytorch_lightning.utilities.seed[0m][[32mINFO[0m] - Global seed set to 12345[0m
+[[36m2022-02-21 07:47:37,910[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating datamodule <src.datamodules.webmed_datamodule.WebNIH>[0m
+[[36m2022-02-21 07:47:43,514[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating model <src.models.concept_module.ConceptVectorModule>[0m
+[[36m2022-02-21 07:47:43,931[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.ModelCheckpoint>[0m
+[[36m2022-02-21 07:47:43,932[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.EarlyStopping>[0m
+[[36m2022-02-21 07:47:43,933[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.RichModelSummary>[0m
+[[36m2022-02-21 07:47:43,934[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.RichProgressBar>[0m
+[[36m2022-02-21 07:47:43,935[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating trainer <pytorch_lightning.Trainer>[0m
+[[36m2022-02-21 07:47:44,343[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - Trainer already configured with model summary callbacks: [<class 'pytorch_lightning.callbacks.rich_model_summary.RichModelSummary'>]. Skipping setting a default `ModelSummary` callback.[0m
+[[36m2022-02-21 07:47:44,344[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - GPU available: True, used: True[0m
+[[36m2022-02-21 07:47:44,344[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - TPU available: False, using: 0 TPU cores[0m
+[[36m2022-02-21 07:47:44,344[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - IPU available: False, using: 0 IPUs[0m
+[[36m2022-02-21 07:47:44,345[0m][[34msrc.train[0m][[32mINFO[0m] - Logging hyperparameters![0m
+[[36m2022-02-21 07:47:44,349[0m][[34msrc.train[0m][[32mINFO[0m] - Starting training![0m
+[[36m2022-02-21 07:47:44,434[0m][[34mpytorch_lightning.accelerators.gpu[0m][[32mINFO[0m] - LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0][0m
+┏━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃   ┃ Name           ┃ Type             ┃ Params ┃
+┡━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ 0 │ model          │ DenseNet         │  7.0 M │
+│ 1 │ criterion      │ CrossEntropyLoss │      0 │
+│ 2 │ train_sim_cav  │ CosineSimilarity │      0 │
+│ 3 │ train_sim_diff │ CosineSimilarity │      0 │
+│ 4 │ val_sim        │ CosineSimilarity │      0 │
+│ 5 │ test_sim       │ CosineSimilarity │      0 │
+│ 6 │ val_sim_best   │ MinMetric        │      0 │
+└───┴────────────────┴──────────────────┴────────┘
+Trainable params: 7.0 M                                                         
+Non-trainable params: 0                                                         
+Total params: 7.0 M                                                             
+Total estimated model params size (MB): 27                                      
+Epoch 0    ━━━━━━━━━━━━━━━━━━━━━━━━━ 3506/-- 1:17:31 • -:--:-- 0.82it/s v_num:  
+Error executing job with overrides: ['experiment=example']
+Traceback (most recent call last):
+  File "/home/luab/experiments/run.py", line 30, in main
+    return train(config)
+  File "/home/luab/experiments/src/train.py", line 77, in train
+    trainer.fit(model=model, datamodule=datamodule)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 740, in fit
+    self._call_and_handle_interrupt(
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 685, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 777, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1199, in _run
+    self._dispatch()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1279, in _dispatch
+    self.training_type_plugin.start_training(self)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1289, in run_stage
+    return self._run_train()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1319, in _run_train
+    self.fit_loop.run()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/fit_loop.py", line 234, in advance
+    self.epoch_loop.run(data_fetcher)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/base.py", line 151, in run
+    output = self.on_run_end()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 286, in on_run_end
+    epoch_end_outputs = model.training_epoch_end(epoch_end_outputs)
+  File "/home/luab/experiments/src/models/concept_module.py", line 121, in training_epoch_end
+    self.cav = torch.mean(outputs["cav"], dim=0)
+TypeError: list indices must be integers or slices, not str
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+[[36m2022-02-21 10:30:40,802[0m][[34msrc.utils[0m][[32mINFO[0m] - Disabling python warnings! <config.ignore_warnings=True>[0m
+CONFIG                                                                          
+├── trainer                                                                     
+│   └── _target_: pytorch_lightning.Trainer                                     
+│       gpus: 1                                                                 
+│       min_epochs: 1                                                           
+│       max_epochs: 10                                                          
+│       resume_from_checkpoint: null                                            
+│       num_sanity_val_steps: 0                                                 
+│                                                                               
+├── model                                                                       
+│   └── _target_: src.models.concept_module.ConceptVectorModule                 
+│       model:                                                                  
+│         _target_: torchxrayvision.models.DenseNet                             
+│         weights: densenet121-res224-all                                       
+│       concept: gender                                                         
+│                                                                               
+├── datamodule                                                                  
+│   └── _target_: src.datamodules.webmed_datamodule.WebNIH                      
+│       bucket_name: nih                                                        
+│       client_url: http://datastore.lua.lab:8080                               
+│       image_handler:                                                          
+│         _target_: src.datamodules.utils.xrayvision_preproc                    
+│       transform:                                                              
+│         _target_: torchvision.transforms.Compose                              
+│         transforms:                                                           
+│         - _target_: torchxrayvision.datasets.XRayCenterCrop                   
+│         - _target_: torchxrayvision.datasets.XRayResizer                      
+│           size: 224                                                           
+│       batch_size: 32                                                          
+│       num_workers: 5                                                          
+│       pin_memory: true                                                        
+│                                                                               
+├── callbacks                                                                   
+│   └── model_checkpoint:                                                       
+│         _target_: pytorch_lightning.callbacks.ModelCheckpoint                 
+│         monitor: val/acc                                                      
+│         mode: max                                                             
+│         save_top_k: 1                                                         
+│         save_last: true                                                       
+│         verbose: false                                                        
+│         dirpath: checkpoints/                                                 
+│         filename: epoch_{epoch:03d}                                           
+│         auto_insert_metric_name: false                                        
+│       early_stopping:                                                         
+│         _target_: pytorch_lightning.callbacks.EarlyStopping                   
+│         monitor: val/acc                                                      
+│         mode: max                                                             
+│         patience: 100                                                         
+│         min_delta: 0                                                          
+│       model_summary:                                                          
+│         _target_: pytorch_lightning.callbacks.RichModelSummary                
+│         max_depth: 1                                                          
+│       rich_progress_bar:                                                      
+│         _target_: pytorch_lightning.callbacks.RichProgressBar                 
+│                                                                               
+├── logger                                                                      
+│   └── csv:                                                                    
+│         name: csv/example                                                     
+│       wandb:                                                                  
+│         tags:                                                                 
+│         - nih                                                                 
+│         - dense_net                                                           
+│                                                                               
+├── test_after_training                                                         
+│   └── True                                                                    
+├── seed                                                                        
+│   └── 12345                                                                   
+└── name                                                                        
+    └── example                                                                 
+[[36m2022-02-21 10:30:40,838[0m][[34mpytorch_lightning.utilities.seed[0m][[32mINFO[0m] - Global seed set to 12345[0m
+[[36m2022-02-21 10:30:40,858[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating datamodule <src.datamodules.webmed_datamodule.WebNIH>[0m
+[[36m2022-02-21 10:30:49,070[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating model <src.models.concept_module.ConceptVectorModule>[0m
+[[36m2022-02-21 10:30:51,341[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.ModelCheckpoint>[0m
+[[36m2022-02-21 10:30:51,347[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.EarlyStopping>[0m
+[[36m2022-02-21 10:30:51,348[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.RichModelSummary>[0m
+[[36m2022-02-21 10:30:51,349[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating callback <pytorch_lightning.callbacks.RichProgressBar>[0m
+[[36m2022-02-21 10:30:51,350[0m][[34msrc.train[0m][[32mINFO[0m] - Instantiating trainer <pytorch_lightning.Trainer>[0m
+[[36m2022-02-21 10:30:52,950[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - Trainer already configured with model summary callbacks: [<class 'pytorch_lightning.callbacks.rich_model_summary.RichModelSummary'>]. Skipping setting a default `ModelSummary` callback.[0m
+[[36m2022-02-21 10:30:52,951[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - GPU available: True, used: True[0m
+[[36m2022-02-21 10:30:52,951[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - TPU available: False, using: 0 TPU cores[0m
+[[36m2022-02-21 10:30:52,951[0m][[34mpytorch_lightning.utilities.distributed[0m][[32mINFO[0m] - IPU available: False, using: 0 IPUs[0m
+[[36m2022-02-21 10:30:52,952[0m][[34msrc.train[0m][[32mINFO[0m] - Logging hyperparameters![0m
+[[36m2022-02-21 10:30:52,957[0m][[34msrc.train[0m][[32mINFO[0m] - Starting training![0m
+[[36m2022-02-21 10:30:53,068[0m][[34mpytorch_lightning.accelerators.gpu[0m][[32mINFO[0m] - LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0][0m
+┏━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃   ┃ Name           ┃ Type             ┃ Params ┃
+┡━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ 0 │ model          │ DenseNet         │  7.0 M │
+│ 1 │ criterion      │ CrossEntropyLoss │      0 │
+│ 2 │ train_sim_cav  │ CosineSimilarity │      0 │
+│ 3 │ train_sim_diff │ CosineSimilarity │      0 │
+│ 4 │ val_sim        │ CosineSimilarity │      0 │
+│ 5 │ test_sim       │ CosineSimilarity │      0 │
+│ 6 │ val_sim_best   │ MinMetric        │      0 │
+└───┴────────────────┴──────────────────┴────────┘
+Trainable params: 7.0 M                                                         
+Non-trainable params: 0                                                         
+Total params: 7.0 M                                                             
+Total estimated model params size (MB): 27                                      
+Epoch 0    ━━━━━━━━━━━━━━━━━━━━━━━━━ 3506/-- 1:01:29 • -:--:-- 0.93it/s v_num:  
+Error executing job with overrides: ['experiment=example']
+Traceback (most recent call last):
+  File "/home/luab/experiments/run.py", line 30, in main
+    return train(config)
+  File "/home/luab/experiments/src/train.py", line 77, in train
+    trainer.fit(model=model, datamodule=datamodule)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 740, in fit
+    self._call_and_handle_interrupt(
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 685, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 777, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1199, in _run
+    self._dispatch()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1279, in _dispatch
+    self.training_type_plugin.start_training(self)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1289, in run_stage
+    return self._run_train()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 1319, in _run_train
+    self.fit_loop.run()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/fit_loop.py", line 234, in advance
+    self.epoch_loop.run(data_fetcher)
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/base.py", line 151, in run
+    output = self.on_run_end()
+  File "/home/luab/main/lib/python3.9/site-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 286, in on_run_end
+    epoch_end_outputs = model.training_epoch_end(epoch_end_outputs)
+  File "/home/luab/experiments/src/models/concept_module.py", line 121, in training_epoch_end
+    self.cav = torch.mean(torch.stack(map(lambda x: x["cav"], outputs)), dim=0)
+TypeError: stack(): argument 'tensors' (position 1) must be tuple of Tensors, not map
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

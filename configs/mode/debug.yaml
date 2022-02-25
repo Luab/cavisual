@@ -13,7 +13,7 @@ debug_mode: True
 
 hydra:
   # sets level of all command line loggers to 'DEBUG'
-  verbose: True
+  verbose: False
 
   # https://hydra.cc/docs/tutorials/basic/running_your_app/logging/
   # use this to set level of only chosen command line loggers to 'DEBUG'
