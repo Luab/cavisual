@@ -27,15 +27,17 @@ class WebMedDataset(LightningDataModule):
         pin_memory: bool = False,
         seed=42,
         test_split=0.8,
+        only_bbox=False,
         # dataset specific part
         unique_patients=True,
         views=["PA"],
         pathology_masks=False,
     ) -> None:
         super().__init__()
+        self._has_setup_all = True
 
         self.save_hyperparameters(logger=False)
-
+        self.only_bbox = only_bbox
         self.batch_size = batch_size
         self.num_workers = num_workers
         if transform:
@@ -76,14 +78,18 @@ class WebMedDataset(LightningDataModule):
             dataset_size = len(self.shards_url[:-1])
             test_size = int(self.hparams.test_split * dataset_size)
             train_size = dataset_size - test_size
-
-            train_urls, test_urls = train_test_split(
-                self.shards_url[:-1],
-                test_size=self.hparams.test_split,
-                random_state=self.hparams.seed,
-            )
-            val_urls = [self.shards_url[-1]]
-            print(len(train_urls))
+            if self.hparams.test_split == 0:
+                train_urls = self.shards_url
+                test_urls = self.shards_url
+                val_urls = self.shards_url
+            else:
+                train_urls, test_urls = train_test_split(
+                    self.shards_url[:-1],
+                    test_size=self.hparams.test_split,
+                    random_state=self.hparams.seed,
+                )
+                val_urls = [self.shards_url[-1]]
+                print(len(train_urls))
 
             self.data_train = self.get_webdataset(
                 train_urls,
@@ -124,7 +130,7 @@ class WebMedDataset(LightningDataModule):
         len_epoch = len(urls)
         print(len_epoch)
         return (
-            wds.WebDataset(urls)
+            wds.WebDataset(urls, cache_dir=None)
             .decode(image_handler)
             .associate(label_associator)
             .select(selector)

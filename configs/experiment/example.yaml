@@ -20,9 +20,13 @@ name: "example"
 
 seed: 12345
 
+datasets: 
+  - chexpert: webchexpert.yaml
+  - nih: webnih.yaml
+  
 trainer:
   min_epochs: 1
-  max_epochs: 2
+  max_epochs: 5
   gpus: 1
 
 datamodule:

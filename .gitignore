@@ -146,3 +146,12 @@ logs/
 wandb/
 .env
 .autoenv
+
+CheXpert/*
+ChexZero/*
+ChexZeroAE/*
+None/*
+train*
+notebooks/None/*
+src/models/chexzero_plus/*
+src/models/vqvae*

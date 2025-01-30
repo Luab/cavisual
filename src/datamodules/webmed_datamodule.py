@@ -32,7 +32,7 @@ class WebNIH(WebMedDataset):
         self.pathology_dict = dict(
             zip(self.pathologies, range(0, len(self.pathologies))))
         self.pathology_encoder = lambda x: self.pathology_dict[x]
-
+        
         # Prepare webdataset stuff
         self.shards_url = list(
             filter(
@@ -43,6 +43,8 @@ class WebNIH(WebMedDataset):
                 )),
             ))
         self.label_associator = self.get_associator()
+        if self.only_bbox:
+            self.selector = self.get_selector()
 
     def get_associator(self) -> Callable:
         # Get csv file
@@ -50,6 +52,24 @@ class WebNIH(WebMedDataset):
                                          "Data_Entry_2017_v2020.csv")
         data = StringIO(str(raw_csv, "utf-8"))
         self.csv = pd.read_csv(data)
+        
+        raw_csv = self.client.get_object(self.bucket,
+                                         "BBox_List_2017.csv")
+        data = StringIO(str(raw_csv, "utf-8"))
+
+        self.bbox = pd.read_csv(data,names=["Image Index", "Finding Label", "x", "y", "w", "h", "_1", "_2", "_3"],
+                                              skiprows=1)
+        #Collect all masks together
+        masks = list(map(lambda x: self.get_bbox(x[1]),self.bbox.iterrows()))
+        print("b")
+
+        d = dict()
+        for i_id in masks:
+            for items in i_id.items():
+                if d.get(items[0]):
+                    d[items[0]]["pathology_masks"].update(items[1]["pathology_masks"])
+                else:
+                    d[items[0]] = items[1]
 
         images = self.csv["Image Index"].str.replace(".png", "")
         self.labels = []
@@ -62,7 +82,7 @@ class WebNIH(WebMedDataset):
 
         age = self.csv["Patient Age"].values
         gender = (self.csv["Patient Gender"] == "M").values
-        # labels = list(range(0,len(images)))
+
         self.associator = dict(
             zip(
                 images,
@@ -77,8 +97,26 @@ class WebNIH(WebMedDataset):
                     zip(self.labels, age, gender),
                 ),
             ))
+        # Add masks to associator
+        self.associator = {k: {**v, **d.get(k,{})} for k,v in self.associator.items()}
         return lambda x: self.associator[x]
 
+    def get_bbox(self,row,this_size=224) -> dict:
+            scale = this_size / 1024
+            key = row.str.replace(".png", "")
+            mask = np.zeros([this_size, this_size])
+            xywh = np.asarray([row.x, row.y, row.w, row.h])
+            xywh = xywh * scale
+            xywh = xywh.astype(int)
+            mask[xywh[1]:xywh[1] + xywh[3], xywh[0]:xywh[0] + xywh[2]] = 1
+
+            # Resize so image resizing works
+            mask = mask[None, :, :]
+            return {key.iloc[0]:{"pathology_masks":{row["Finding Label"]:{"mask":mask,"mask_label":row["Finding Label"]}}}}
+
+    def get_selector(self) -> Callable:
+        select_images = self.bbox["Image Index"].str.replace(".png", "")
+        return lambda x: select_images.str.contains(x["__key__"]).any()
 
 class WebCheXpert(WebMedDataset):
 
@@ -154,8 +192,9 @@ class WebCheXpert(WebMedDataset):
                     "utf-8")))
         self.csv = pd.concat([csv, csv2])
 
-        images = self.csv.Path.apply(path_to_name).values
-        self.labels = self.csv[self.pathologies].values
+        images = self.csv['Path'].apply(path_to_name).values
+        self.labels = self.csv[self.pathologies].replace(-1,0).fillna(0).values
+
         # labels = list(range(0,len(images)))
         age = self.csv["Age"].values
         gender = (self.csv["Sex"] == "Male").values

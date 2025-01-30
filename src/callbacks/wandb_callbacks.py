@@ -266,24 +266,28 @@ class LogImagePredictions(Callback):
             experiment = logger.experiment
 
             # get a validation batch from the validation dat loader
-            val_samples = next(iter(trainer.datamodule.val_dataloader()))
-            val_imgs, val_labels = val_samples
+            val_samples = next(iter(trainer.val_dataloaders[0]))
 
             # run the batch through the network
-            val_imgs = val_imgs.to(device=pl_module.device)
-            logits = pl_module(val_imgs)
-            preds = torch.argmax(logits, dim=-1)
+            val_imgs = val_samples['img'].to(device=pl_module.device)
+            recs = pl_module(val_imgs)[0]
 
             # log the images as wandb Image
             experiment.log(
                 {
-                    f"Images/{experiment.name}": [
-                        wandb.Image(x, caption=f"Pred:{pred}, Label:{y}")
-                        for x, pred, y in zip(
-                            val_imgs[: self.num_samples],
-                            preds[: self.num_samples],
-                            val_labels[: self.num_samples],
-                        )
+                    f"Images/{experiment.name}_original": [
+                        wandb.Image(x, caption="Original")
+                        for x in val_imgs[: self.num_samples]
                     ]
                 }
             )
+            experiment.log(
+                {
+                    f"Images/{experiment.name}_reconstruction": [
+                        wandb.Image(x, caption="Reconstruction")
+                        for x in recs[: self.num_samples]
+                        
+                    ]
+                }
+            )
+

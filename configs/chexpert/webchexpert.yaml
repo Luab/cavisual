@@ -1,6 +1,6 @@
-_target_: src.datamodules.webmed_datamodule.WebNIH
+_target_: src.datamodules.webmed_datamodule.WebCheXpert
 
-bucket_name: "nih" 
+bucket_name: "medical" 
 client_url: "http://datastore.lua.lab:8080"
 image_handler: 
       _target_: src.datamodules.utils.xrayvision_preproc
@@ -14,5 +14,3 @@ transform:
 batch_size: 100
 num_workers: 1
 pin_memory: False
-only_bbox: False
-test_split: 0.8
